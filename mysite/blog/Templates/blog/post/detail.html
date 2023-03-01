@@ -7,4 +7,13 @@
 <p>
     <a href='{% url "blog:post_share" post.id %}'>Share this post</a>
 </p>
+<form method="post">
+    {% csrf_token %}
+    {{form}}
+    <button type="submit">Оставить коммент</button>
+</form>
+{% for el in comments %}
+    {{el.user}}    {{el.created}}<br>
+    {{el.text}}<br><br>
+{% endfor %}
 {% endblock %}

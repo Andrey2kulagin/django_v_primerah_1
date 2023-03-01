@@ -1,8 +1,8 @@
 from django.shortcuts import render, get_object_or_404
-from .models import Post
+from .models import Post, Comments
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.views.generic import ListView
-from .forms import EmailPostForm
+from .forms import EmailPostForm, CommentsForm
 
 
 # Create your views here.
@@ -32,9 +32,21 @@ class PostListView(ListView):
 
 def post_detail(request, year, month, day, post):
     context = {}
+
     post = get_object_or_404(Post, slug=post, status='published', publish__year=year,
                              publish__month=month, publish__day=day)
+    if request.method == "POST":
+        form = CommentsForm(request.POST)
+        if form.is_valid():
+            object = form.save(commit=False)
+            object.user = request.user
+            object.post = post
+            object.save()
+    comments = reversed(Comments.objects.filter(post=post))
+    form = CommentsForm()
     context['post'] = post
+    context['form'] = form
+    context["comments"] = comments
     return render(request, 'blog/post/detail.html', context)
 
 
